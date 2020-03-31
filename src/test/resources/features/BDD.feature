@@ -20,9 +20,9 @@
       | sdfkjhyfejrhsdfksdfh    | sdjfhksdjfhksdjfhyrgberjhbdf  |
       | admin                         | простокакойтопароль          |
       | gromovalex                | 1234qwerasdf                         |
-      | abyrvalg                     |                                                |
-      |                                    |                                               |
-      |                                    | abyvalg                                  |
+      | abyrvalg                     | [blank]                                    |
+      | [blank]                        | [blank]                                    |
+      | [blank]                        | abyvalg                                  |
 #    Когда проверка что данные не верные
 
     Тогда тест завершен

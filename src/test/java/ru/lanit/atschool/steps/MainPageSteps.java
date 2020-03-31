@@ -1,6 +1,7 @@
 package ru.lanit.atschool.steps;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.DataTableType;
 import io.cucumber.java.ru.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -26,6 +27,12 @@ public class MainPageSteps{
         } finally {
             WebDriverManager.getDriver().manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
         }
+    }
+
+//    замена [blank] на пустую строку в данных
+    @DataTableType(replaceWithEmptyString = "[blank]")
+    public List<Map<String, String>> convert(DataTable dataTable) {
+        return dataTable.asMaps();
     }
 
     @Пусть("открыт браузер и введен адрес \"(.*)\"$")
@@ -70,10 +77,9 @@ public class MainPageSteps{
         Thread.sleep(1000);
     }
 
-//    эту штуку с циклами по любому не разбить никак на отдельные
+//    эту штуку с циклами не разбить никак на отдельные
     @Дано("^проверка логинов и паролей пользователей$")
-    public void логиныИПаролиПользователей(DataTable arg) throws InterruptedException, NullPointerException {
-        List<Map<String, String>> table = arg.asMaps(String.class, String.class);
+    public void логиныИПаролиПользователей(List<Map<String, String>> table) throws InterruptedException {
         for (int i=0; i<table.size(); i++) {
             WebElement webElement = driver.findElement(By.xpath("//button[@class='btn navbar-btn btn-default btn-sign-in']"));
             webElement.click();
@@ -82,27 +88,25 @@ public class MainPageSteps{
             String password = table.get(i).get("password");
             WebElement webElementLogin = driver.findElement(By.xpath("//input[@id='id_username']"));
             webElementLogin.clear();
-            webElementLogin.click();
-            try {
-                webElementLogin.sendKeys(username.toString());
-                if (password.isEmpty()) {
-                    webElementLogin.findElement(By.xpath("//button[@class='btn btn-primary btn-block' and @type='submit']"));
-                    webElement.click();
-                }
+            if (username.isEmpty()) {
+                webElementLogin.findElement(By.xpath("//button[@class='btn btn-primary btn-block' and @type='submit']"));
+                webElementLogin.click();
+            } else {
+                webElementLogin.click();
+                webElementLogin.sendKeys(username);
                 WebElement webElementPassword = driver.findElement(By.xpath("//input[@id='id_password']"));
                 webElementPassword.clear();
-                webElementPassword.click();
-                webElementPassword.sendKeys(password.toString());
                 if (password.isEmpty()) {
                     webElementLogin.findElement(By.xpath("//button[@class='btn btn-primary btn-block' and @type='submit']"));
-                    webElement.click();}
-                Thread.sleep(100);
-                webElementPassword.sendKeys(Keys.ENTER);
-//                webElementLogin.findElement(By.xpath("//button[@class='btn btn-primary btn-block' and @type='submit']"));
-//                webElement.click();
-            } catch (NullPointerException npe) {}
-            Thread.sleep(1000);
-
+                    webElementLogin.click();
+                } else {
+                    webElementPassword.click();
+                    webElementPassword.sendKeys(password);
+                    Thread.sleep(100);
+                    webElementPassword.sendKeys(Keys.ENTER);
+                    Thread.sleep(1000);
+                }
+            }
             if (isElementPresent("//div[@class='alerts-snackbar in']")|| isElementPresent("//button[@class='close' and @aria-label='Закрыть']")) {
                 System.out.println("Неверные параметры. Авторизоваться нет возможности! Проверка пройдена!"); // там 2 вида вывода, или поля пустые или неверный логин пароль. причем это все выведено через 1 элемент, не разделить их
 //                Assert.assertTrue(driver.findElement(By.xpath("//div[@class='alerts-snackbar in']")).isDisplayed());
